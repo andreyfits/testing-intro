@@ -1,6 +1,8 @@
-function notImplemented() {
-  throw new Error('Корзина ещё не реализована. Сначала прочитайте тесты.');
-}
+const PROMO_CODE = 'SAVE10';
+const PROMO_DISCOUNT_PERCENT = 10;
+const PROMO_MIN_SUBTOTAL = 20000;
+const FREE_DELIVERY_MIN_SUBTOTAL = 50000;
+const DELIVERY_COST = 30000;
 
 function assertPositiveInteger(quantity) {
   if (!Number.isInteger(quantity) || quantity <= 0) {
@@ -45,7 +47,18 @@ function calculateCartSubtotal(cart) {
   return cart.reduce((sum, { price, quantity }) => sum + price * quantity, 0);
 }
 
-function calculateOrderTotal() { return notImplemented(); }
+function isKnownPromoCode(promoCode) {
+  return typeof promoCode === 'string' && promoCode.trim().toUpperCase() === PROMO_CODE;
+}
+
+function calculateOrderTotal(cart, promoCode) {
+  const subtotal = calculateCartSubtotal(cart);
+  const isDiscountApplied = isKnownPromoCode(promoCode) && subtotal >= PROMO_MIN_SUBTOTAL;
+  const discount = isDiscountApplied ? Math.round((subtotal * PROMO_DISCOUNT_PERCENT) / 100) : 0;
+  const delivery = subtotal < FREE_DELIVERY_MIN_SUBTOTAL ? DELIVERY_COST : 0;
+
+  return { subtotal, discount, delivery, total: subtotal - discount + delivery };
+}
 
 const cartApi = { addToCart, changeQuantity, removeFromCart, calculateCartSubtotal, calculateOrderTotal };
 
